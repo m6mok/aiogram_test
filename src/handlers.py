@@ -95,12 +95,12 @@ async def start_handler(message: Message):
     await message.answer(START_MESSAGE, reply_markup=keyboard)
 
 
-@router.callback_query(F.regexp(r'choice_\d+'))
+@router.callback_query(F.data.regexp(r'choice_\d+'))
 async def choices_callback(callback_query: CallbackQuery):
     if (code := callback_query.data.split('_')[1]) == '1':
-        await callback_query.answer(CHOICE_1_REPLY_TEXT)
+        await callback_query.message.answer(CHOICE_1_REPLY_TEXT)
     elif code == '2':
-        await callback_query.answer(CHOICE_2_REPLY_TEXT)
+        await callback_query.message.answer(CHOICE_2_REPLY_TEXT)
     else:
         Logger.obj.log.info(f'Wrong choice callback code: {code}')
 
