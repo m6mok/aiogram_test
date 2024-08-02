@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "aiogram-test"
+version = "0.1.0"
+description = ""
+authors = ["Eugene Dementiev <dea2003@bk.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+aiogram = "^3.10.0"
+aiosqlite = "^0.20.0"
+requests = "^2.32.3"
+apscheduler = "^3.10.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

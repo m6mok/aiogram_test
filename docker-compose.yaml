@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    command: sh -c \
+      "poetry run python main.py"
+    volumes:
+      - .:/app
+    env_file: "project.env"
+
+volumes:
+  db_data:
