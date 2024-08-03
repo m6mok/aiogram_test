@@ -39,7 +39,7 @@ USER_LIST_MESSAGE = 'Список пользователей:\n{table}'
 WEATHER_MESSAGE = 'Напишите название города'
 WEATHER_ANSWER_MESSAGE = 'Погода в городе {city}:\nТемпература воздуха {temp}\n{desc}'
 
-REPLY_TIME = 15 * 60
+REPLY_TIME = 15
 REPLY_MESSAGE = 'Привет, {username}! Как ты сегодня?'
 REPLY_ANSWER_MESSAGE = 'Спасибо за ответ!'
 REPLY_FORGOT_MESSAGE = 'Вы забыли ответить'
@@ -63,7 +63,8 @@ class CommandStates(StatesGroup):
 class ReminderMiddleware(BaseMiddleware):
     async def __call__(self, handler, event, data):
         if not get_flag(data, 'reminder'):
-            asyncio_create_task(self.set_reminder(event, data['state']))
+            reminder_task = asyncio_create_task(self.set_reminder(event, data['state']))
+            await data['state'].update_data(reminder_task=reminder_task)
         return await handler(event, data)
 
     async def set_reminder(self, event: Update, state: FSMContext):
@@ -71,6 +72,7 @@ class ReminderMiddleware(BaseMiddleware):
         current_state = await state.get_state()
         if current_state == CommandStates.waiting_reply.state:
             await event.message.answer(REPLY_FORGOT_MESSAGE)
+        await state.update_data(reminder_task=None)
 
 
 @router.message(Command('start'))
@@ -190,4 +192,7 @@ async def reply_check_handler(message: Message, state: FSMContext):
 @router.message(CommandStates.waiting_reply, flags={'reminder': True})
 async def waiting_reply_check_handler(message: Message, state: FSMContext):
     await message.answer(REPLY_ANSWER_MESSAGE)
+    reminder_task = (await state.get_data()).get('reminder_task')
+    if reminder_task:
+        reminder_task.cancel()
     await state.clear()
